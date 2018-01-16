@@ -13,6 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import dto.Cardto;
 import dto.Customerdto;
 
 @Entity
@@ -58,7 +59,13 @@ public class Customer {
 		this.lastname = customer.getLastname();
 		this.address = customer.getAddress();
 		this.phonenumber = customer.getPhonenumber();
-		this.cars = customer.getCars();
+		
+		if(customer.getCars() == null) {
+			for(Cardto c : customer.getCars()) {
+				this.cars.add(new Car(c));
+			}	
+		}
+
 	}
 
 	public int getCustomerid() {

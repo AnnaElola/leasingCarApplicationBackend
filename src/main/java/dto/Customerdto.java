@@ -30,7 +30,7 @@ public class Customerdto {
 	private String phonenumber;
 	
 	@XmlElement
-	private List<Car> cars;
+	private List<Cardto> cars;
 	
 	public Customerdto() {}
 	
@@ -47,7 +47,14 @@ public class Customerdto {
 		this.lastname = customer.getLastname();
 		this.address = customer.getAddress();
 		this.phonenumber = customer.getPhonenumber();
-		this.cars = customer.getCars();
+		
+		if(customer.getCars() == null) {
+			for(Car c : customer.getCars()) {
+				this.cars.add(new Cardto(c));
+			}
+		}
+
+	
 	}
 
 	public int getCustomerid() {
@@ -90,11 +97,11 @@ public class Customerdto {
 		this.phonenumber = phonenumber;
 	}
 
-	public List<Car> getCars() {
+	public List<Cardto> getCars() {
 		return cars;
 	}
 
-	public void setCars(List<Car> cars) {
+	public void setCars(List<Cardto> cars) {
 		this.cars = cars;
 	}
 	

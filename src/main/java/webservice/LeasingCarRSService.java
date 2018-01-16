@@ -55,7 +55,6 @@ public class LeasingCarRSService {
 			Cardto cardto = new Cardto(car);
 			result.add(cardto);
 		}
-		
 		return result;
 	}
 	
