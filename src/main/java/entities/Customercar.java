@@ -30,12 +30,6 @@ public class Customercar {
 		this.licensenumber = ccdto.getLicensenumber();
 	}
 	
-	public Customercar(int ccid, int customerid, String licensenumber) {
-		this.ccid = ccid;
-		this.customerid = customerid;
-		this.licensenumber = licensenumber;
-	}
-	
 	public Customercar(int customerid, String licensenumber) {
 		this.customerid = customerid;
 		this.licensenumber = licensenumber;

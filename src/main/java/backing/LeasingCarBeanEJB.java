@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+import entities.Accountroles;
 import entities.Car;
 import entities.Customer;
 import entities.Customercar;
@@ -18,19 +19,11 @@ public class LeasingCarBeanEJB {
 	@PersistenceContext(unitName="leasingcar")
 	private EntityManager em;
 	
-	private List<Car> carList;
-	private List<Customer> customerList;
-	
-	
 	//Car-metoder
 	
 	public List<Car> getCarList(){
-		if(carList == null) {
-			TypedQuery<Car> q = em.createQuery("SELECT c FROM Car AS c", Car.class); //FROM Car är från entityklassen
-			carList = q.getResultList();
-		}
-		
-		return carList;
+		TypedQuery<Car> q = em.createQuery("SELECT c FROM Car AS c", Car.class); //FROM Car är från entityklassen
+		return q.getResultList();
 	}
 	
 	public List<Car> getAvailableOrLeasedCarList(boolean isleased){
@@ -56,23 +49,28 @@ public class LeasingCarBeanEJB {
 	public void deleteCar(String licensenumber) {
 		Car ent = findByLicensenumber(licensenumber);
 		em.remove(ent);
+		
+		if(ent.getIsleased() == true)
+			deleteOnlyCustomercar(licensenumber);
 	}
 	
 	
 	//Customer-metoder
 	
 	public List<Customer> getCustomerList(){
-		if(customerList == null) {
-			TypedQuery<Customer> q = em.createQuery("SELECT c FROM Customer AS c", Customer.class); //FROM Customer är från entityklassen
-			customerList = q.getResultList();
-		}
-		
-		return customerList;
+		TypedQuery<Customer> q = em.createQuery("SELECT c FROM Customer AS c", Customer.class); //FROM Customer är från entityklassen
+		return q.getResultList();
 	}
 	
 	public Customer findCustomerById(int id) {
 		TypedQuery<Customer> q = em.createQuery("SELECT c FROM Customer AS c WHERE c.customerid = :id", Customer.class);
 		q.setParameter("id", id);
+		return q.getSingleResult();
+	}
+	
+	public Customer findCustomerByUsername(String username) {
+		TypedQuery<Customer> q = em.createQuery("SELECT c FROM Customer AS c WHERE c.email = :username", Customer.class);
+		q.setParameter("username", username);
 		return q.getSingleResult();
 	}
 	
@@ -83,28 +81,39 @@ public class LeasingCarBeanEJB {
 	public void deleteCustomer(int id) {
 		Customer ent = findCustomerById(id);
 		em.remove(ent);
+		Accountroles aroles = findAccountrolesByUsername(ent.getEmail());
+		em.remove(aroles);
+		for(Car car : ent.getCars()) {
+			deleteCustomercar(car.getLicensenumber());
+		}
+	}
+	
+	//Accountroles
+	
+	public Accountroles findAccountrolesByUsername(String username) {
+		TypedQuery<Accountroles> q = em.createQuery("SELECT ar FROM Accountroles AS ar WHERE ar.username = :username", Accountroles.class);
+		q.setParameter("username", username);
+		return q.getSingleResult();
+	}
+	
+	public void addCustomerToLogin(Customer customer) {
+		Accountroles aroles = new Accountroles(customer.getEmail(), "user");
+		em.merge(aroles);
 	}
 	
 	//Customer-car
 	
 	public List<Car> getCarsForCustomer(int customerid){
-		//Hämta alla bilar en kund leasar
-		/*
-		TypedQuery<Car> q = em.createQuery("SELECT c FROM Car c, Customercar cc WHERE cc.customerid = :customerid AND c.licensenumber = cc.licensenumber", Car.class); 
-		q.setParameter("customerid", customerid);
-		carList = q.getResultList();
-		*/
 		Customer customer = findCustomerById(customerid);
 		return customer.getCars();
 	}
 	
-	public Customercar leaseCar(Customercar customercar) {
-		Car car = findByLicensenumber(customercar.getLicensenumber());
+	public Customercar leaseCar(Customercar cc) {
+		Car car = findByLicensenumber(cc.getLicensenumber());
 		car.setIsleased(true);
 		
 		em.merge(car);
-		
-		return em.merge(customercar);
+		return em.merge(cc);
 	}
 
 	public void deleteCustomercar(int ccid) {
@@ -117,9 +126,31 @@ public class LeasingCarBeanEJB {
 		em.remove(ent);
 	}
 	
+	public void deleteCustomercar(String licensenumber) {
+		deleteOnlyCustomercar(licensenumber);
+		
+		Car car = findByLicensenumber(licensenumber);
+		car.setIsleased(false);
+		
+		em.merge(car);
+
+	}
+	
+	public void deleteOnlyCustomercar(String licensenumber) {
+		Customercar ent = findCustomercarByLicensenumber(licensenumber);
+
+		em.remove(ent);
+	}
+	
 	private Customercar findCustomercarById(int ccid) {
 		TypedQuery<Customercar> q = em.createQuery("SELECT c FROM Customercar AS c WHERE c.ccid = :ccid", Customercar.class);
 		q.setParameter("ccid", ccid);
+		return q.getSingleResult();
+	}
+	
+	private Customercar findCustomercarByLicensenumber(String licensenumber) {
+		TypedQuery<Customercar> q = em.createQuery("SELECT c FROM Customercar AS c WHERE c.licensenumber = :licensenumber", Customercar.class);
+		q.setParameter("licensenumber", licensenumber);
 		return q.getSingleResult();
 	}
 }

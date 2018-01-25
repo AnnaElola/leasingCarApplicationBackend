@@ -104,7 +104,30 @@ public class LeasingCarRSService {
 	public Customerdto postCustomer(Customerdto customer) {
 		Customer ent = new Customer(customer);
 		ent = leasingCarEJB.mergeCustomer(ent);
+		leasingCarEJB.addCustomerToLogin(ent);
 		return new Customerdto(ent);
+	}
+	
+	@POST
+	@Path("/updateCustomer")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Customerdto updateCustomer(Customerdto customer) {
+		Customer ent = new Customer(customer);
+		ent.setCustomerid(customer.getCustomerid());
+		ent = leasingCarEJB.mergeCustomer(ent);
+		return new Customerdto(ent);
+	}
+	
+	@GET
+	@Path("/customerByUsername/{username}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Customerdto getCustomerByUsername(@PathParam("username") String username){
+		Customer customer = leasingCarEJB.findCustomerByUsername(username);
+	
+		Customerdto customerdto = new Customerdto(customer);
+		
+		return customerdto;
 	}
 	
 	//Customercar LEASE
@@ -127,15 +150,16 @@ public class LeasingCarRSService {
 	@Path("/newLease")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Customercardto postCustomercar(Customercardto customercar) {
-		Customercar ent = new Customercar(customercar);
-		ent = leasingCarEJB.leaseCar(ent);
+	public Customercardto postCustomercar(Customercardto ccdto) {
+		Customercar ent = new Customercar(ccdto);
+		leasingCarEJB.leaseCar(ent);	
+		
 		return new Customercardto(ent);
 	}
 	
 	@DELETE
-	@Path("/deleteLease/{ccid}")
-	public void deleteCustomercar(@PathParam("ccid") int ccid) {
-		leasingCarEJB.deleteCustomercar(ccid);	
+	@Path("/deleteLease/{licensenumber}")
+	public void deleteCustomercar(@PathParam("licensenumber") String licensenumber) {
+		leasingCarEJB.deleteCustomercar(licensenumber);	
 	}
 }
