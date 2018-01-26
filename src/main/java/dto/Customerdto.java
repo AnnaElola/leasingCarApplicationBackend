@@ -1,5 +1,6 @@
 package dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -58,7 +59,8 @@ public class Customerdto {
 		this.email = customer.getEmail();
 		this.password = customer.getPassword();
 		
-		if(customer.getCars() == null) {
+		if(customer.getCars().size() > 0) {
+			cars = new ArrayList<Cardto>();
 			for(Car c : customer.getCars()) {
 				this.cars.add(new Cardto(c));
 			}

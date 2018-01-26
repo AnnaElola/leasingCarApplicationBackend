@@ -101,7 +101,7 @@ public class LeasingCarBeanEJB {
 		em.merge(aroles);
 	}
 	
-	//Customer-car
+	//Customer-car LEASE
 	
 	public List<Car> getCarsForCustomer(int customerid){
 		Customer customer = findCustomerById(customerid);
@@ -112,8 +112,8 @@ public class LeasingCarBeanEJB {
 		Car car = findByLicensenumber(cc.getLicensenumber());
 		car.setIsleased(true);
 		
-		em.merge(car);
-		return em.merge(cc);
+		em.merge(car); //Set car isleased to true
+		return em.merge(cc); //Merge customercar
 	}
 
 	public void deleteCustomercar(int ccid) {

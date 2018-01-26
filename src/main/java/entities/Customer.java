@@ -1,5 +1,6 @@
 package entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -67,7 +68,8 @@ public class Customer {
 		this.email = customer.getEmail();
 		this.password = customer.getPassword();
 		
-		if(customer.getCars() != null) {
+		if(customer.getCars().size() > 0) {
+			cars = new ArrayList<Car>();
 			for(Cardto c : customer.getCars()) {
 				this.cars.add(new Car(c));
 			}	
